@@ -56,7 +56,7 @@ def OR_perceptron():
     training_examples = []
     training_labels = []
 
-    for i in range(num_train):
+    for i in range(100):
         training_examples.append([random.random(), random.random()])
         # We want our perceptron to be noise tolerant, so we label all examples where x1 and x2 > 0.8 as 1.0
         training_labels.append(1.0 if training_examples[i][0] > 0.75 or training_examples[i][1] > 0.75 else 0.0)
@@ -64,11 +64,28 @@ def OR_perceptron():
     validate_examples = []
     validate_labels = []
 
-    for i in range(num_train):
+    for i in range(100):
         validate_examples.append([random.random(), random.random()])
         validate_labels.append(1.0 if validate_examples[i][0] > 0.75 or validate_examples[i][1] > 0.75 else 0.0)
 
-    print(training_examples, training_labels)
+    OR = Perceptron(2, bias=-0.5)
+    valid_percentage = 0
+
+    i = 0
+    while valid_percentage < 0.98: # We want our Perceptron to have an accuracy of at least 80%
+        i += 1
+
+        OR.train(training_examples, training_labels, learning_rate)  # Train our Perceptron
+        print('------ Iteration ' + str(i) + ' ------')
+        print(OR.weights)
+        valid_percentage = OR.validate(validate_examples, validate_labels, verbose=True) # Validate it
+        print(valid_percentage)
+
+        # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
+        # You shouldn't need to do this as your networks may require much longer to train. 
+        if i == 100: 
+            break
+    
 
 if __name__ == "__main__":
     AND_perceptron()
