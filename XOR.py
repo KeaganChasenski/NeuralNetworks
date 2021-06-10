@@ -41,16 +41,16 @@ def AND_perceptron():
         i += 1
 
         AND.train(training_examples, training_labels, learning_rate)  # Train our Perceptron
-        print('------ Iteration ' + str(i) + ' ------')
-        print(AND.weights)
-        valid_percentage = AND.validate(validate_examples, validate_labels, verbose=True) # Validate it
-        print(valid_percentage)
+        #print('------ Iteration ' + str(i) + ' ------')
+        #print(AND.weights)
+        valid_percentage = AND.validate(validate_examples, validate_labels, verbose=False) # Validate it
+        #print(valid_percentage)
 
         # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
         # You shouldn't need to do this as your networks may require much longer to train. 
         if i == 50: 
             break
-
+    print("Accuracy = ", valid_percentage)
     return AND
 
 def OR_perceptron():
@@ -78,16 +78,16 @@ def OR_perceptron():
         i += 1
 
         OR.train(training_examples, training_labels, learning_rate)  # Train our Perceptron
-        print('------ Iteration ' + str(i) + ' ------')
-        print(OR.weights)
-        valid_percentage = OR.validate(validate_examples, validate_labels, verbose=True) # Validate it
-        print(valid_percentage)
+        #print('------ Iteration ' + str(i) + ' ------')
+        #print(OR.weights)
+        valid_percentage = OR.validate(validate_examples, validate_labels, verbose=False) # Validate it
+        #print(valid_percentage)
 
         # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
         # You shouldn't need to do this as your networks may require much longer to train. 
         if i == 100: 
             break
-    
+    print("Accuracy = ", valid_percentage)
     return OR
 
 def NAND_perceptron():
@@ -115,16 +115,16 @@ def NAND_perceptron():
         i += 1
 
         NAND.train(training_examples, training_labels, learning_rate)  # Train our Perceptron
-        print('------ Iteration ' + str(i) + ' ------')
-        print(NAND.weights)
-        valid_percentage = NAND.validate(validate_examples, validate_labels, verbose=True) # Validate it
-        print(valid_percentage)
+        #print('------ Iteration ' + str(i) + ' ------')
+        #print(NAND.weights)
+        valid_percentage = NAND.validate(validate_examples, validate_labels, verbose=False) # Validate it
+        #print(valid_percentage)
 
         # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
         # You shouldn't need to do this as your networks may require much longer to train. 
         if i == 50: 
             break
-    
+    print("Accuracy = ", valid_percentage)
     return NAND
 
 def XOR_perceptron(x1,x2):
@@ -143,4 +143,7 @@ if __name__ == "__main__":
     NAND = NAND_perceptron()
     
     print("Please enter two inputs:")
-    sys.argv
+    x1, x2 = map(float, input().split())
+    xor = XOR_perceptron(x1,x2)
+    print(xor)
+    
