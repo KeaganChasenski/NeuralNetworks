@@ -1,0 +1,6 @@
+/venv/
+.DS_Store
+Readme
+requirements.txt
+Assignment3.pages
+__pycache__
