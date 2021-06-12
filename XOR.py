@@ -17,7 +17,10 @@ import random
 from  Perceptron import Perceptron
 
 #HyperParamter - defines how many train and validation expamples to create
-num_train = 1000 ; 
+num_train = 10000 ; 
+and_learning_rate = 0.2
+or_learning_rate = 0.4
+not_learning_rate = 0.1
 
 def AND_perceptron():
     print("Training AND Peceptron (Gate 0)...")
@@ -51,12 +54,12 @@ def AND_perceptron():
     # Loop to continuely train the modle until we reach an accuracy of 98%
     # Loop counter
     i = 0
-    while valid_percentage < 0.9: 
+    while valid_percentage < 0.98: 
         i += 1
 
         # Train AND perceptron using training examples and labels
         # Learning rate for AND = 0.2
-        AND.train(training_examples, training_labels, 0.2) 
+        AND.train(training_examples, training_labels, and_learning_rate) 
 
         # Once we have trained, validate the modle
         # returns the number of correct predictions / total predictions
@@ -65,8 +68,8 @@ def AND_perceptron():
 
         # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
         # You shouldn't need to do this as your networks may require much longer to train. 
-        #if i == num_train: 
-        #    break
+        if i == num_train: 
+            break
 
     # Display the accuracy of this perceptron, and how many iterations it took of training to achieve this
     print("Accuracy = ", valid_percentage, "in", i , "iterations")
@@ -106,16 +109,21 @@ def OR_perceptron():
     # Loop to continuely train the modle until we reach an accuracy of 98%
     # Loop counter
     i = 0
-    while valid_percentage < 0.8:
+    while valid_percentage < 0.98:
         i += 1
 
         # Train OR perceptron using training examples and labels
         # Learning rate for OR = 0.4
-        OR.train(training_examples, training_labels, 0.4)  
+        OR.train(training_examples, training_labels, or_learning_rate)  
         
         # Once we have trained, validate the modle
         # returns the number of correct predictions / total predictions
         valid_percentage = OR.validate(validate_examples, validate_labels, verbose=False) 
+
+        # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
+        # You shouldn't need to do this as your networks may require much longer to train. 
+        if i == num_train: 
+            break
 
     # Display the accuracy of this perceptron, and how many iterations it took of training to achieve this    
     print("Accuracy = ", valid_percentage, "in ", i , "i terations")
@@ -124,7 +132,7 @@ def OR_perceptron():
     return OR
 
 def NOT_perceptron():
-    print("Training NOT Peceptron (Gate 3)...")
+    print("Training NOT Peceptron (Gate 2)...")
 
     # Blank training examples and labels array
     training_examples = []
@@ -161,11 +169,16 @@ def NOT_perceptron():
 
         # Train NOT perceptron using training examples and labels
         # Learning rate for NOT = 0.2
-        NOT.train(training_examples, training_labels, 0.2)  
+        NOT.train(training_examples, training_labels, not_learning_rate)  
 
         # Once we have trained, validate the modle
         # returns the number of correct predictions / total predictions
         valid_percentage = NOT.validate(validate_examples, validate_labels, verbose=False) 
+
+        # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
+        # You shouldn't need to do this as your networks may require much longer to train. 
+        if i == num_train: 
+            break
 
     # Display the accuracy of this perceptron, and how many iterations it took of training to achieve this
     print("Accuracy = ", valid_percentage, "in", i , "iterations")
@@ -178,34 +191,38 @@ def XOR_perceptron(x1,x2):
     x = [x1, x2]
 
     # Get the output of the AND gate (either 0 or 1), using the AND gate model
+    # inputs = x
     and_gate = AND.predict(x)
     if and_gate is True:
         and_gate = 1
     else:
         and_gate = 0
+    print("And gate prediction", and_gate)
 
     # Get the output of the OR gate (either 0 or 1), using the OR gate model
+    # inputs = x
     or_gate = OR.predict(x)
     if or_gate is True:
-        and_gate = 1
+        or_gate = 1
     else:
         or_gate = 0
-    
-    print(or_gate)
-    not_gate = NOT.predict(and_gate)
+    print("OR gate prediction", or_gate)
+
+    # Get the output of the NOT gate (either 0 or 1), using the NOT gate model
+    # input = and_gate
+    not_gate = NOT.predict([and_gate])
     if not_gate is True:
         not_gate = 1 
     else: 
         not_gate = 0
-    
-    print(not_gate)
-    # XOR is the ouput of the Not gate (from an AND gate) ANDED with the output from a OR gate
-    #xor = AND.predict([OR.predict(x), not_gate])
+    print("NOT gate prediction", not_gate)
 
-    #if xor is True:
-    #    return 1
-    #if xor is False:
-    #    return 0
+    # XOR is the ouput of the Not gate (from an AND gate) ANDED with the output from a OR gate
+    xor = AND.predict([or_gate, not_gate])
+    if xor is True:
+        return 1
+    if xor is False:
+        return 0
 
 if __name__ == "__main__":
     # Construct each perceptron
