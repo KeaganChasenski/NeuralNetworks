@@ -160,7 +160,7 @@ def NOT_perceptron():
         i += 1
 
         # Train NOT perceptron using training examples and labels
-        # Learning rate for NOT = 0.4
+        # Learning rate for NOT = 0.2
         NOT.train(training_examples, training_labels, 0.2)  
 
         # Once we have trained, validate the modle
@@ -177,27 +177,40 @@ def XOR_perceptron(x1,x2):
     # Create array from two x inputs
     x = [x1, x2]
 
-    # Input of NOT gate from the output of AND gate
-    not_gate = NOT.predict(AND.predict(x))
+    # Get the output of the AND gate (either 0 or 1), using the AND gate model
+    and_gate = AND.predict(x)
+    if and_gate is True:
+        and_gate = 1
+    else:
+        and_gate = 0
 
+    # Get the output of the OR gate (either 0 or 1), using the OR gate model
+    or_gate = OR.predict(x)
+    if or_gate is True:
+        and_gate = 1
+    else:
+        or_gate = 0
+    
+    print(or_gate)
+    not_gate = NOT.predict(and_gate)
+    if not_gate is True:
+        not_gate = 1 
+    else: 
+        not_gate = 0
+    
+    print(not_gate)
     # XOR is the ouput of the Not gate (from an AND gate) ANDED with the output from a OR gate
-    xor = AND.predict([OR.predict(x), not_gate])
+    #xor = AND.predict([OR.predict(x), not_gate])
 
-    if xor is True:
-        return 1
-    if xor is False:
-        return 0
+    #if xor is True:
+    #    return 1
+    #if xor is False:
+    #    return 0
 
 if __name__ == "__main__":
     # Construct each perceptron
-    #AND_accuracy = 0
-    #while AND_accuracy < 0.98:
-
-    #AND, AND_accuracy = AND_perceptron()
     AND = AND_perceptron()
-
     OR = OR_perceptron()
-
     NOT = NOT_perceptron()
     
     # Build Network of perceptrons
