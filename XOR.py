@@ -123,87 +123,65 @@ def OR_perceptron():
     # Return the model
     return OR
 
-def NAND_perceptron():
-    print("Training NAND Peceptron (Gate 2)...")
-    training_examples = []
-    training_labels = []
-
-    for i in range(num_train):
-        training_examples.append([random.random(), random.random()])
-        # We want our perceptron to be noise tolerant, so we label all examples where x1 and x2 > 0.8 as 1.0
-        training_labels.append(0 if training_examples[i][0] > 0.75 and training_examples[i][1] > 0.75 else 1)
-
-    validate_examples = []
-    validate_labels = []
-
-    for i in range(num_train):
-        validate_examples.append([random.random(), random.random()])
-        validate_labels.append(0 if validate_examples[i][0] > 0.75 and validate_examples[i][1] > 0.75 else 1)
-
-    NAND = Perceptron(2, bias=0.70)
-    valid_percentage = 0
-
-    i = 0
-    while valid_percentage < 0.98: # We want our Perceptron to have an accuracy of at least 80%
-        i += 1
-
-        NAND.train(training_examples, training_labels, 0.1)  # Train our Perceptron
-        #print('------ Iteration ' + str(i) + ' ------')
-        #print(NAND.weights)
-        valid_percentage = NAND.validate(validate_examples, validate_labels, verbose=False) # Validate it
-        #print(valid_percentage)
-
-        # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
-        # You shouldn't need to do this as your networks may require much longer to train. 
-        if i == num_train: 
-            break
-    print("Accuracy = ", valid_percentage, "in ", i , "i terations")
-    return NAND
-
 def NOT_perceptron():
     print("Training NOT Peceptron (Gate 3)...")
+
+    # Blank training examples and labels array
     training_examples = []
     training_labels = []
 
+    # Randomly choose a number beteween -0.25, 1.25 for the one input [x1] at the index of the array
+    # Since we want the perceptron to be noise positive, the label works on a 0 if it is greater than 0.75
     for i in range(num_train):
-        training_examples.append(random.random())
-        # We want our perceptron to be noise tolerant, so we label all examples where x1 and x2 > 0.8 as 1.0
-        training_labels.append(0 if training_examples[i] > 0.75  else 1)
+        training_examples.append([random.uniform(-0.25,1.25)])
+        # For an NOT gate, if the input is <0.75 then the output is 1
+        # and if the input is >0.75, then the output is 0
+        training_labels.append(0 if training_examples[i][0] > 0.75  else 1)
 
+    # Create Blank Validation examples
     validate_examples = []
     validate_labels = []
 
+    # The loop follows the same logic as the training examples being produced above
+    # Except these values are kept exclusively for validating a trained perceptron
     for i in range(num_train):
-        validate_examples.append(random.random())
-        validate_labels.append(0 if validate_examples[i] > 0.75  else 1)
+        validate_examples.append([random.uniform(-0.25,1.25)])
+        validate_labels.append(0 if validate_examples[i][0] > 0.75  else 1)
 
+    # Create the NOT perceptron from the Perceptron.py class
+    # 1 inputs, and bias value = 0.5
     NOT = Perceptron(1, bias=0.50)
     valid_percentage = 0
 
-    print(NOT.weights, NOT.num_inputs)
-    print(training_examples)
-    print(training_examples[0])
+    # Loop to continuely train the modle until we reach an accuracy of 98%
+    # Loop counter
     i = 0
-    while valid_percentage < 0.98: # We want our Perceptron to have an accuracy of at least 80%
+    while valid_percentage < 0.98: 
         i += 1
 
-        NOT.train(training_examples, training_labels, 0.2)  # Train our Perceptron
-        print('------ Iteration ' + str(i) + ' ------')
-        print(NAND.weights)
-        valid_percentage = NAND.validate(validate_examples, validate_labels, verbose=False) # Validate it
-        print(valid_percentage)
+        # Train NOT perceptron using training examples and labels
+        # Learning rate for NOT = 0.4
+        NOT.train(training_examples, training_labels, 0.2)  
 
-        # This is just to break the training if it takes over 50 iterations. (For demonstration purposes)
-        # You shouldn't need to do this as your networks may require much longer to train. 
-        if i == num_train: 
-            break
-    print("Accuracy = ", valid_percentage, "in ", i , "i terations")
+        # Once we have trained, validate the modle
+        # returns the number of correct predictions / total predictions
+        valid_percentage = NOT.validate(validate_examples, validate_labels, verbose=False) 
+
+    # Display the accuracy of this perceptron, and how many iterations it took of training to achieve this
+    print("Accuracy = ", valid_percentage, "in", i , "iterations")
+
+    # Return the model
     return NOT
 
 def XOR_perceptron(x1,x2):
+    # Create array from two x inputs
     x = [x1, x2]
 
-    xor = AND.predict([OR.predict(x), NAND.predict(x)])
+    # Input of NOT gate from the output of AND gate
+    not_gate = NOT.predict(AND.predict(x))
+
+    # XOR is the ouput of the Not gate (from an AND gate) ANDED with the output from a OR gate
+    xor = AND.predict([OR.predict(x), not_gate])
 
     if xor is True:
         return 1
@@ -220,9 +198,7 @@ if __name__ == "__main__":
 
     OR = OR_perceptron()
 
-    #NAND = NAND_perceptron()
-
-    #NOT = NOT_perceptron()
+    NOT = NOT_perceptron()
     
     # Build Network of perceptrons
     print("Constructing Network...")
