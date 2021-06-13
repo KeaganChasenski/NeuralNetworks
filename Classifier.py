@@ -26,6 +26,7 @@ batch_size_test = 1000
 
 
 def load_data():
+
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
 
     trainset = datasets.MNIST(r'..\input\MNIST', download=True, train=True, transform=transform)
@@ -41,5 +42,19 @@ def load_data():
 
     print(images.shape)
     print(labels.shape) 
+
+    return images, labels
+
+def plot_data(images, labels):
+    for i in range(9):
+        plt.subplot(3,3,i+1)
+        plt.tight_layout()
+        plt.imshow(images[i][0], cmap='gray', interpolation='none')
+        plt.title("Ground Truth: {}".format(labels[i]))
+        plt.xticks([])
+        plt.yticks([])
+    plt.show()
+
 if __name__ == "__main__":
-    load_data()
+    images, labels = load_data()
+    plot_data(images, labels)
