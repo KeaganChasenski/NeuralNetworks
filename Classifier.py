@@ -20,6 +20,7 @@ from torchvision import datasets, transforms
 from torch import nn, optim
 
 import matplotlib.pyplot as plt
+from time import time 
 
 batch_size_train = 64
 batch_size_test = 1000
@@ -72,6 +73,7 @@ def build_Model():
     return model
 
 def loss_function(images, labels, train_loader, model):
+    print("defining loss function...")
     # defining the negative log-likelihood loss for calculating loss
     criterion = nn.NLLLoss()
     images, labels = next(iter(train_loader))
@@ -80,12 +82,94 @@ def loss_function(images, labels, train_loader, model):
     logps = model(images) #log probabilities
     loss = criterion(logps, labels) #calculate the NLL-loss
     
-    return loss
+    return loss, criterion
+
+def grad_weights(loss, model):
+    print('Before backward pass: \n', model[0].weight.grad)
+    loss.backward() # to calculate gradients of parameter 
+    print('After backward pass: \n', model[0].weight.grad)
+
+def train(model, train_loader, criterion):
+    print("Training neural network...")
+    # defining the optimiser with stochastic gradient descent and default parameters
+    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+
+    print('Initial weights - ', model[0].weight)
+
+    images, labels = next(iter(train_loader))
+    images.resize_(64, 784)
+
+    # Clear the gradients, do this because gradients are accumulated
+    optimizer.zero_grad()
+
+    # Forward pass
+    output = model(images)
+    loss = criterion(output, labels)
+    # the backward pass and update weights
+    loss.backward()
+    print('Gradient -', model[0].weight.grad)
+
+    time0 = time()
+    epochs = 15 # total number of iteration for training
+    running_loss_list= []
+    epochs_list = []
+
+    for e in range(epochs):
+        running_loss = 0
+        for images, labels in train_loader:
+            # Flatenning MNIST images with size [64,784]
+            images = images.view(images.shape[0], -1) 
+        
+            # defining gradient in each epoch as 0
+            optimizer.zero_grad()
+            
+            # modeling for each image batch
+            output = model(images)
+            
+            # calculating the loss
+            loss = criterion(output, labels)
+            
+            # This is where the model learns by backpropagating
+            loss.backward()
+            
+            # And optimizes its weights here
+            optimizer.step()
+            
+            # calculating the loss
+            running_loss += loss.item()
+            
+        else:
+            print("Epoch {} - Training loss: {}".format(e, running_loss/len(train_loader)))
 
 
+    print("\nTraining Time (in minutes) =",(time()-time0)/60)
+
+def validate(test_loader, model):
+    correct_count, all_count = 0, 0
+    for images,labels in test_loader:
+        for i in range(len(labels)):
+            img = images[i].view(1, 784)
+
+            with torch.no_grad():
+                logps = model(img)
+
+            ps = torch.exp(logps)
+            probab = list(ps.numpy()[0])
+            pred_label = probab.index(max(probab))
+            true_label = labels.numpy()[i]
+            if(true_label == pred_label):
+                correct_count += 1
+            all_count += 1
+
+    print("Number Of Images Tested =", all_count)
+    print("\nModel Accuracy =", (correct_count/all_count))
+
+    
 if __name__ == "__main__":
 
     images, labels, train_loader = load_data()
     plot_data(images, labels)
     model = build_Model()
-    loss = loss_function(images,labels, train_loader, model)
+    loss, criterion = loss_function(images,labels, train_loader, model)
+    grad_weights(loss, model)
+    train(model, train_loader, criterion)
