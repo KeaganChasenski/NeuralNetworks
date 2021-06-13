@@ -3,7 +3,7 @@
 
 # Keagan Chasenski
 # CHSKEA001
-# 10 June 2021
+# 12 June 2021
 
 #Returns
     # The class (digit) of the image which the user provides the path to (From the MNST10 data set)
@@ -41,20 +41,10 @@ def load_data():
     # creating images for image and lables for image number (0 to 9) 
     images, labels = dataiter.next() 
 
-    print(images.shape)
-    print(labels.shape) 
+    #print(images.shape)
+    #print(labels.shape) 
 
     return images, labels, trainloader
-
-def plot_data(images, labels):
-    for i in range(9):
-        plt.subplot(3,3,i+1)
-        plt.tight_layout()
-        plt.imshow(images[i][0], cmap='gray', interpolation='none')
-        plt.title("Ground Truth: {}".format(labels[i]))
-        plt.xticks([])
-        plt.yticks([])
-    plt.show()
 
 def build_Model():
 
@@ -91,21 +81,24 @@ def grad_weights(loss, model):
 
 def train(model, train_loader, criterion):
     print("Training neural network...")
-    # defining the optimiser with stochastic gradient descent and default parameters
+
+    # Define optimiser with stochastic gradient descent and default parameters
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
     print('Initial weights - ', model[0].weight)
 
+    # Load images and labels through iterator
     images, labels = next(iter(train_loader))
     images.resize_(64, 784)
 
-    # Clear the gradients, do this because gradients are accumulated
+    # Clear gradients
     optimizer.zero_grad()
 
     # Forward pass
     output = model(images)
     loss = criterion(output, labels)
-    # the backward pass and update weights
+
+    # backward pass to update weights
     loss.backward()
     print('Gradient -', model[0].weight.grad)
 
@@ -125,28 +118,31 @@ def train(model, train_loader, criterion):
             # Flatenning MNIST images with size [64,784]
             images = images.view(images.shape[0], -1) 
         
-            # defining gradient in each epoch as 0
+            # Set gradient = 0 for each epoch
             optimizer.zero_grad()
             
-            # modeling for each image batch
+            # Model for each image
             output = model(images)
             
-            # calculating the loss
+            # calculate loss
             loss = criterion(output, labels)
             
-            # This is where the model learns by backpropagating
+            # Learn from backpropagating
             loss.backward()
             
-            # And optimizes its weights here
+            # Optimizes weights 
             optimizer.step()
             
-            # calculating the loss
+            # calculate the running loss total
             running_loss += loss.item()
             
         else:
+
+            # Display for each epoch the running loss
             print("Epoch {} - Training loss: {}".format(e, running_loss/len(train_loader)))
 
 
+    # Display total runnning time of training.
     print("\nTraining Time (in minutes) =",(time()-time0)/60)
 
 def validate(test_loader, model):
@@ -171,10 +167,18 @@ def validate(test_loader, model):
 
 
 if __name__ == "__main__":
+    # Function calls
 
+    # Load and transform the MNIST data set
     images, labels, train_loader = load_data()
-    plot_data(images, labels)
+    # Build the model
     model = build_Model()
+    # Create the loss function
     loss, criterion = loss_function(images,labels, train_loader, model)
+    # Function to calculate the gradient of descent and weights
     grad_weights(loss, model)
+
+    # Train the model
     train(model, train_loader, criterion)
+
+    #Validate the model
