@@ -109,13 +109,18 @@ def train(model, train_loader, criterion):
     loss.backward()
     print('Gradient -', model[0].weight.grad)
 
+    # Get start time
     time0 = time()
-    epochs = 15 # total number of iteration for training
+    # total number of iteration for training
+    epochs = 15 
     running_loss_list= []
     epochs_list = []
 
+    # Loop for each training epoch
     for e in range(epochs):
         running_loss = 0
+
+        # Loop for each image and assoicated label in the train_loader
         for images, labels in train_loader:
             # Flatenning MNIST images with size [64,784]
             images = images.view(images.shape[0], -1) 
@@ -164,7 +169,7 @@ def validate(test_loader, model):
     print("Number Of Images Tested =", all_count)
     print("\nModel Accuracy =", (correct_count/all_count))
 
-    
+
 if __name__ == "__main__":
 
     images, labels, train_loader = load_data()
