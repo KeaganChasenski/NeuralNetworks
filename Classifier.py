@@ -26,7 +26,7 @@ batch_size_test = 1000
 
 
 def load_data():
-
+    print("loading data...")
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
 
     trainset = datasets.MNIST(r'..\input\MNIST', download=True, train=True, transform=transform)
@@ -43,7 +43,7 @@ def load_data():
     print(images.shape)
     print(labels.shape) 
 
-    return images, labels
+    return images, labels, trainloader
 
 def plot_data(images, labels):
     for i in range(9):
@@ -56,6 +56,9 @@ def plot_data(images, labels):
     plt.show()
 
 def build_Model():
+
+
+    print("building model...")
     model=nn.Sequential(nn.Linear(784,128), # 1 layer:- 784 input 128 o/p
             nn.ReLU(),          # Defining Regular linear unit as activation
             nn.Linear(128,64),  # 2 Layer:- 128 Input and 64 O/p
@@ -65,7 +68,24 @@ def build_Model():
             ) 
 
     print(model)
+
+    return model
+
+def loss_function(images, labels, train_loader, model):
+    # defining the negative log-likelihood loss for calculating loss
+    criterion = nn.NLLLoss()
+    images, labels = next(iter(train_loader))
+    images = images.view(images.shape[0], -1)
+
+    logps = model(images) #log probabilities
+    loss = criterion(logps, labels) #calculate the NLL-loss
+    
+    return loss
+
+
 if __name__ == "__main__":
-    images, labels = load_data()
+
+    images, labels, train_loader = load_data()
     plot_data(images, labels)
-    build_Model()
+    model = build_Model()
+    loss = loss_function(images,labels, train_loader, model)
