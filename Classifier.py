@@ -55,6 +55,17 @@ def plot_data(images, labels):
         plt.yticks([])
     plt.show()
 
+def build_Model():
+    model=nn.Sequential(nn.Linear(784,128), # 1 layer:- 784 input 128 o/p
+            nn.ReLU(),          # Defining Regular linear unit as activation
+            nn.Linear(128,64),  # 2 Layer:- 128 Input and 64 O/p
+            nn.Tanh(),          # Defining Regular linear unit as activation
+            nn.Linear(64,10),   # 3 Layer:- 64 Input and 10 O/P as (0-9)
+            nn.LogSoftmax(dim=1) # Defining the log softmax to find the probablities for the last output unit
+            ) 
+
+    print(model)
 if __name__ == "__main__":
     images, labels = load_data()
     plot_data(images, labels)
+    build_Model()
