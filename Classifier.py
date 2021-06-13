@@ -44,7 +44,7 @@ def load_data():
     #print(images.shape)
     #print(labels.shape) 
 
-    return images, labels, trainloader
+    return images, labels, trainloader, testloader
 
 def build_Model():
 
@@ -75,9 +75,9 @@ def loss_function(images, labels, train_loader, model):
     return loss, criterion
 
 def grad_weights(loss, model):
-    print('Before backward pass: \n', model[0].weight.grad)
+    #print('Before backward pass: \n', model[0].weight.grad)
     loss.backward() # to calculate gradients of parameter 
-    print('After backward pass: \n', model[0].weight.grad)
+    #print('After backward pass: \n', model[0].weight.grad)
 
 def train(model, train_loader, criterion):
     print("Training neural network...")
@@ -85,7 +85,7 @@ def train(model, train_loader, criterion):
     # Define optimiser with stochastic gradient descent and default parameters
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
-    print('Initial weights - ', model[0].weight)
+    #print('Initial weights - ', model[0].weight)
 
     # Load images and labels through iterator
     images, labels = next(iter(train_loader))
@@ -100,7 +100,7 @@ def train(model, train_loader, criterion):
 
     # backward pass to update weights
     loss.backward()
-    print('Gradient -', model[0].weight.grad)
+    #print('Gradient -', model[0].weight.grad)
 
     # Get start time
     time0 = time()
@@ -139,13 +139,15 @@ def train(model, train_loader, criterion):
         else:
 
             # Display for each epoch the running loss
-            print("Epoch {} - Training loss: {}".format(e, running_loss/len(train_loader)))
+            print("Epoch {} -> Training loss = {}".format(e, (running_loss/len(train_loader))))
 
 
     # Display total runnning time of training.
     print("\nTraining Time (in minutes) =",(time()-time0)/60)
 
 def validate(test_loader, model):
+    print("")
+    print("Validating model...")
     correct_count, all_count = 0, 0
     for images,labels in test_loader:
         for i in range(len(labels)):
@@ -163,14 +165,14 @@ def validate(test_loader, model):
             all_count += 1
 
     print("Number Of Images Tested =", all_count)
-    print("\nModel Accuracy =", (correct_count/all_count))
+    print("Model Accuracy =", (correct_count/all_count))
 
 
 if __name__ == "__main__":
     # Function calls
 
     # Load and transform the MNIST data set
-    images, labels, train_loader = load_data()
+    images, labels, train_loader, test_loader = load_data()
     # Build the model
     model = build_Model()
     # Create the loss function
@@ -182,3 +184,6 @@ if __name__ == "__main__":
     train(model, train_loader, criterion)
 
     #Validate the model
+    validate(test_loader, model)
+
+    print("Done! \n")
