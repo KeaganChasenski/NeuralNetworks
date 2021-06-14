@@ -17,8 +17,8 @@ import random
 from  Perceptron import Perceptron
 
 #HyperParamter - defines how many train and validation expamples to create
-num_train = 10000 ; 
-and_learning_rate = 0.2
+num_train = 1000 ; 
+and_learning_rate = 0.01
 or_learning_rate = 0.4
 not_learning_rate = 0.1
 
@@ -32,10 +32,20 @@ def AND_perceptron():
     # Randomly choose a number beteween -0.25, 1.25 for each input [x1,x2] of the index of the array
     # Since we want the perceptron to be noise positive, the label works on a 1 if it is greater than 0.75
     for i in range(num_train):
-        training_examples.append([random.uniform(-0.25,1.25), random.uniform(-0.25,1.25)])
+        # Create two blank arrays, and randomly choose digits between -0.1,0.1 or 0.9,1.1
+        # this is so that there are more values from training around the key criteria
+        x1 = [random.uniform(-0.1,0.1),random.uniform(0.9,1.1)]
+        x2 = [random.uniform(-0.1, 0.1), random.uniform(0.9,1.1)]
+
+        # We still want other random data inbetween, so only do this every second time
+        # Ensure more data clustered around the key points, but also else where. 
+        if i % 2 == 0:
+            training_examples.append([random.choice(x1), random.choice(x2)])
+        else: 
+            training_examples.append([random.uniform(-0.25,1.25), random.uniform(-0.25,1.25)])
         # For an and gate, both the [i][0] AND [i][1] must be postive (>0.75) to recieve a label as 1
         training_labels.append(1.0 if training_examples[i][0] > 0.75 and training_examples[i][1] > 0.75 else 0.0)
-
+    
     # Create Blank Validation examples
     validate_examples = []
     validate_labels = []
@@ -43,12 +53,23 @@ def AND_perceptron():
     # The loop follows the same logic as the training examples being produced above
     # Except these values are kept exclusively for validating a trained perceptron
     for i in range(num_train):
-        validate_examples.append([random.uniform(-0.25,1.25), random.uniform(-0.25,1.25)])
+        # Create two blank arrays, and randomly choose digits between -0.1,0.1 or 0.9,1.1
+        # this is so that there are more values from training around the key criteria
+        x1 = [random.uniform(-0.1,0.1),random.uniform(0.9,1.1)]
+        x2 = [random.uniform(-0.1, 0.1), random.uniform(0.9,1.1)]
+
+        # We still want other random data inbetween, so only do this every second time
+        # Ensure more data clustered around the key points, but also else where. 
+        if i % 2 == 0:
+            validate_examples.append([random.choice(x1), random.choice(x2)])
+        else: 
+            validate_examples.append([random.uniform(-0.25,1.25), random.uniform(-0.25,1.25)])
+
         validate_labels.append(1.0 if validate_examples[i][0] > 0.75 and validate_examples[i][1] > 0.75 else 0.0)
 
     # Create the AND perceptron from the Perceptron.py class
     # 2 inputs, and bias value = -1.5
-    AND = Perceptron(2, bias=-1)
+    AND = Perceptron(2, bias=-1.5)
     valid_percentage = 0
 
     # Loop to continuely train the modle until we reach an accuracy of 98%
@@ -87,7 +108,17 @@ def OR_perceptron():
     # Randomly choose a number beteween -0.25, 1.25 for each input [x1,x2] of the index of the array
     # Since we want the perceptron to be noise positive, the label works on a 1 if it is greater than 0.75
     for i in range(num_train):
-        training_examples.append([random.uniform(-0.25,1.25), random.uniform(-0.25,1.25)])
+        # Create two blank arrays, and randomly choose digits between -0.1,0.1 or 0.9,1.1
+        # this is so that there are more values from training around the key criteria
+        x1 = [random.uniform(-0.1,0.1),random.uniform(0.9,1.1)]
+        x2 = [random.uniform(-0.1, 0.1), random.uniform(0.9,1.1)]
+
+        # We still want other random data inbetween, so only do this every second time
+        # Ensure more data clustered around the key points, but also else where. 
+        if i % 2 == 0:
+            training_examples.append([random.choice(x1), random.choice(x2)])
+        else: 
+            training_examples.append([random.uniform(-0.25,1.25), random.uniform(-0.25,1.25)])
         # For an OR gate, either the [i][0] or [i][1] must be postive (>0.75) to recieve a label as 1
         training_labels.append(1.0 if training_examples[i][0] > 0.75 or training_examples[i][1] > 0.75 else 0.0)
 
@@ -98,12 +129,23 @@ def OR_perceptron():
     # The loop follows the same logic as the training examples being produced above
     # Except these values are kept exclusively for validating a trained perceptron
     for i in range(num_train):
-        validate_examples.append([random.uniform(-0.25,1.25), random.uniform(-0.25,1.25)])
+        # Create two blank arrays, and randomly choose digits between -0.1,0.1 or 0.9,1.1
+        # this is so that there are more values from training around the key criteria
+        x1 = [random.uniform(-0.1,0.1),random.uniform(0.9,1.1)]
+        x2 = [random.uniform(-0.1, 0.1), random.uniform(0.9,1.1)]
+
+        # We still want other random data inbetween, so only do this every second time
+        # Ensure more data clustered around the key points, but also else where. 
+        if i % 2 == 0:
+            validate_examples.append([random.choice(x1), random.choice(x2)])
+        else: 
+            validate_examples.append([random.uniform(-0.25,1.25), random.uniform(-0.25,1.25)])
+    
         validate_labels.append(1.0 if validate_examples[i][0] > 0.75 or validate_examples[i][1] > 0.75 else 0.0)
 
     # Create the OR perceptron from the Perceptron.py class
     # 2 inputs, and bias value = -1
-    OR = Perceptron(2, bias=-1)
+    OR = Perceptron(2, bias=-2)
     valid_percentage = 0
 
     # Loop to continuely train the modle until we reach an accuracy of 98%
