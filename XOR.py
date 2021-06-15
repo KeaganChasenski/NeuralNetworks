@@ -19,9 +19,9 @@ from  Perceptron import Perceptron
 #HyperParamter - defines how many train and validation expamples to create
 num_train = 1000 ; 
 num_validate = 1000 ; 
-and_learning_rate = 0.2
-or_learning_rate = 0.25
-not_learning_rate = 0.01
+and_learning_rate = 0.4
+or_learning_rate = 0.5
+not_learning_rate = 0.1
 
 def AND_perceptron():
     print("Training AND Peceptron (Gate 0)...")
