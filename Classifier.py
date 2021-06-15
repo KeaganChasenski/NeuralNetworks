@@ -25,6 +25,8 @@ from time import time
 # Hyper Parameters
 batch_size_train = 64
 batch_size_test = 1000
+learning_rate = 0.01
+momentum = 0.9 
 
 
 def load_data():
@@ -41,9 +43,6 @@ def load_data():
     dataiter = iter(trainloader) 
     # creating images for image and lables for image number (0 to 9) 
     images, labels = dataiter.next() 
-
-    #print(images.shape)
-    #print(labels.shape) 
 
     return images, labels, trainloader, testloader
 
@@ -75,7 +74,8 @@ def build_Model():
 
 def loss_function(images, labels, train_loader, model):
     print("defining loss function...")
-    # defining the negative log-likelihood loss for calculating loss
+
+    # negative log-likelihood loss for calculating loss
     criterion = nn.NLLLoss()
     images, labels = next(iter(train_loader))
     images = images.view(images.shape[0], -1)
@@ -85,18 +85,18 @@ def loss_function(images, labels, train_loader, model):
     
     return loss, criterion
 
+# Don't need this i think
 def grad_weights(loss, model):
-    #print('Before backward pass: \n', model[0].weight.grad)
-    loss.backward() # to calculate gradients of parameter 
-    #print('After backward pass: \n', model[0].weight.grad)
+
+    # to calculate gradients of parameters 
+    # Use backward pass from PyTorch
+    loss.backward() 
 
 def train(model, train_loader, criterion):
     print("Training neural network...")
 
-    # Define optimiser with stochastic gradient descent and default parameters
-    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-
-    #print('Initial weights - ', model[0].weight)
+    # Optimiser using stochastic gradient descent
+    optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
 
     # Load images and labels through iterator
     images, labels = next(iter(train_loader))
@@ -111,14 +111,12 @@ def train(model, train_loader, criterion):
 
     # backward pass to update weights
     loss.backward()
-    #print('Gradient -', model[0].weight.grad)
 
     # Get start time
     time0 = time()
+
     # total number of iteration for training
     epochs = 15 
-    running_loss_list= []
-    epochs_list = []
 
     # Loop for each training epoch
     for e in range(epochs):
@@ -146,12 +144,9 @@ def train(model, train_loader, criterion):
             
             # calculate the running loss total
             running_loss += loss.item()
-            
-        else:
 
-            # Display for each epoch the running loss
-            print("Epoch {} -> Training loss = {}".format(e, (running_loss/len(train_loader))))
-
+        # Display for each epoch the running loss
+        print("Epoch {} -> Training loss = {}".format(e, (running_loss/len(train_loader))))
 
     # Display total runnning time of training.
     print("\nTraining Time (in minutes) =",(time()-time0)/60)
@@ -198,3 +193,28 @@ if __name__ == "__main__":
     validate(test_loader, model)
 
     print("Done! \n")
+
+    # Blank path for first condition of while loop
+    path = ""
+
+    while path != "exit":
+        print("Please enter a filepath:")
+        # Get the image at the file path entered
+        img = images[0].view(1, 784)
+
+
+        with torch.no_grad():
+            # log probability from model of the image
+            logpb = model(img)
+        
+        # convert log probability to exponetial to get acutal value
+        pb = torch.exp(logpb)
+        # Will return an array of probabilites for each digit
+        probab = list(pb.numpy()[0])
+
+        # The classification of the digit is the max probabilty from out model
+        print("Classifier =", probab.index(max(probab)))
+
+    print("exiting...")
+
+    
