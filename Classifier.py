@@ -22,13 +22,14 @@ from torch import nn, optim
 import matplotlib.pyplot as plt
 from time import time 
 
+# Hyper Parameters
 batch_size_train = 64
 batch_size_test = 1000
 
 
 def load_data():
     print("loading data...")
-    transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
+    transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,)),])
 
     trainset = datasets.MNIST(r'..\input\MNIST', download=True, train=True, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size_train, shuffle=True)
@@ -48,12 +49,13 @@ def load_data():
 
 def build_Model():
 
-
     print("building model...")
+    # Firstly we know that the first input layer with need 784 neurons ( 28 pixels X 28 pixels)
+    # nn.Sequetial from PyTorch allows a tensor to passed sequentially through operations
     model=nn.Sequential(nn.Linear(784,128), # 1 layer:- 784 input 128 o/p
             nn.ReLU(),          # Defining Regular linear unit as activation
             nn.Linear(128,64),  # 2 Layer:- 128 Input and 64 O/p
-            nn.Tanh(),          # Defining Regular linear unit as activation
+            nn.ReLU(), 
             nn.Linear(64,10),   # 3 Layer:- 64 Input and 10 O/P as (0-9)
             nn.LogSoftmax(dim=1) # Defining the log softmax to find the probablities for the last output unit
             ) 
