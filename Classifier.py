@@ -49,19 +49,28 @@ def load_data():
 
 def build_Model():
 
-    print("building model...")
+    print("building model... \n")
     # Firstly we know that the first input layer with need 784 neurons ( 28 pixels X 28 pixels)
     # nn.Sequetial from PyTorch allows a tensor to passed sequentially through operations
-    model=nn.Sequential(nn.Linear(784,128), # 1 layer:- 784 input 128 o/p
-            nn.ReLU(),          # Defining Regular linear unit as activation
-            nn.Linear(128,64),  # 2 Layer:- 128 Input and 64 O/p
-            nn.ReLU(), 
-            nn.Linear(64,10),   # 3 Layer:- 64 Input and 10 O/P as (0-9)
-            nn.LogSoftmax(dim=1) # Defining the log softmax to find the probablities for the last output unit
+
+    model=nn.Sequential(nn.Linear(784,128), # 1st layer: 784 input 128 output
+            nn.ReLU(),          # ReLu activation for 1st layer
+            nn.Linear(128,64),  # 2nd Layer: 128 Input and 64 output
+            nn.ReLU(),          # ReLu activation for 2nd layer
+            nn.Linear(64,10),   # 3rd Layer: 64 Input and 10 outout for (0-9)
+            nn.LogSoftmax(dim=1) # log softmax for the probablities of the output layer (3rd)
             ) 
 
-    print(model)
+    # Display model used
+    print("Model built: ")
+    print("\t 1) 1st layer: Linear (in_ features = 784, out_features = 128)")
+    print("\t \t Activation function for 1st layer = ReLU()")
+    print("\t 2) 2nd layer: Linear (in_ features = 128, out_features = 64)")
+    print("\t \t Activation function for 2nd layer = ReLU()")
+    print("\t 3) 3rd layer: Linear (in_ features = 64, out_features = 10)")
+    print("\t \t Activation function for 3rd layer = LogSoftmax() \n")
 
+    # Return model
     return model
 
 def loss_function(images, labels, train_loader, model):
