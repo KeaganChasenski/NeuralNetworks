@@ -22,21 +22,24 @@ from torch import nn, optim
 import matplotlib.pyplot as plt
 from time import time 
 
+from PIL import Image
+
 # Hyper Parameters
 batch_size_train = 64
 batch_size_test = 1000
 learning_rate = 0.01
 momentum = 0.9 
+epochs = 3
 
 
 def load_data():
     print("loading data...")
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,)),])
 
-    trainset = datasets.MNIST(r'..\input\MNIST', download=True, train=True, transform=transform)
+    trainset = datasets.MNIST(r'..\input\MNIST', download=False, train=True, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size_train, shuffle=True)
 
-    testset = datasets.MNIST(r'..\input\MNIST', download=True, train=False, transform=transform)
+    testset = datasets.MNIST(r'..\input\MNIST', download=False, train=False, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size_test, shuffle=True)
 
     # creating a iterator
@@ -75,24 +78,24 @@ def build_Model():
 def loss_function(images, labels, train_loader, model):
     print("defining loss function...")
 
-    # negative log-likelihood loss for calculating loss
-    criterion = nn.NLLLoss()
+    loss_function = nn.CrossEntropyLoss()
     images, labels = next(iter(train_loader))
     images = images.view(images.shape[0], -1)
 
-    logps = model(images) #log probabilities
-    loss = criterion(logps, labels) #calculate the NLL-loss
+    #log probabilities
+    logps = model(images) 
+    #calculate the loss
+    loss = loss_function(logps, labels) 
     
-    return loss, criterion
+    return loss, loss_function
 
-# Don't need this i think
 def grad_weights(loss, model):
 
     # to calculate gradients of parameters 
     # Use backward pass from PyTorch
     loss.backward() 
 
-def train(model, train_loader, criterion):
+def train(model, train_loader, loss_function):
     print("Training neural network...")
 
     # Optimiser using stochastic gradient descent
@@ -107,16 +110,14 @@ def train(model, train_loader, criterion):
 
     # Forward pass
     output = model(images)
-    loss = criterion(output, labels)
+    loss = loss_function(output, labels)
 
     # backward pass to update weights
     loss.backward()
 
     # Get start time
     time0 = time()
-
-    # total number of iteration for training
-    epochs = 15 
+ 
 
     # Loop for each training epoch
     for e in range(epochs):
@@ -134,7 +135,7 @@ def train(model, train_loader, criterion):
             output = model(images)
             
             # calculate loss
-            loss = criterion(output, labels)
+            loss = loss_function(output, labels)
             
             # Learn from backpropagating
             loss.backward()
@@ -154,7 +155,9 @@ def train(model, train_loader, criterion):
 def validate(test_loader, model):
     print("")
     print("Validating model...")
-    correct_count, all_count = 0, 0
+    correct_count = 0
+    all_count = 0
+
     for images,labels in test_loader:
         for i in range(len(labels)):
             img = images[i].view(1, 784)
@@ -173,7 +176,6 @@ def validate(test_loader, model):
     print("Number Of Images Tested =", all_count)
     print("Model Accuracy =", (correct_count/all_count))
 
-
 if __name__ == "__main__":
     # Function calls
 
@@ -182,12 +184,12 @@ if __name__ == "__main__":
     # Build the model
     model = build_Model()
     # Create the loss function
-    loss, criterion = loss_function(images,labels, train_loader, model)
+    loss, loss_function = loss_function(images,labels, train_loader, model)
     # Function to calculate the gradient of descent and weights
     grad_weights(loss, model)
 
     # Train the model
-    train(model, train_loader, criterion)
+    train(model, train_loader, loss_function)
 
     #Validate the model
     validate(test_loader, model)
@@ -199,13 +201,21 @@ if __name__ == "__main__":
 
     while path != "exit":
         print("Please enter a filepath:")
+        path = input()
         # Get the image at the file path entered
-        img = images[0].view(1, 784)
+    
+        img = Image.open(path)
 
+        t = transforms.Compose([
+            transforms.ToTensor()
+        ])
 
+        img_tr = t(img)
+        img_tr_new = img_tr.view(1, 784)
+        
         with torch.no_grad():
             # log probability from model of the image
-            logpb = model(img)
+            logpb = model(img_tr_new)
         
         # convert log probability to exponetial to get acutal value
         pb = torch.exp(logpb)
@@ -214,7 +224,7 @@ if __name__ == "__main__":
 
         # The classification of the digit is the max probabilty from out model
         print("Classifier =", probab.index(max(probab)))
-
+        
     print("exiting...")
 
     
