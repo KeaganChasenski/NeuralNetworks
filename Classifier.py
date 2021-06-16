@@ -47,6 +47,7 @@ def load_data():
     # creating images for image and lables for image number (0 to 9) 
     images, labels = dataiter.next() 
 
+    # Return images and labels created from the data iterator
     return images, labels, trainloader, testloader
 
 def build_Model():
@@ -78,8 +79,11 @@ def build_Model():
 def loss_function(images, labels, train_loader, model):
     print("defining loss function...")
 
+    # Define cross Entropy Loss
     loss_function = nn.CrossEntropyLoss()
+    # Get next image and label from the traini_loader using the iterator 
     images, labels = next(iter(train_loader))
+    # Flatten to shape we can perform calculations on
     images = images.view(images.shape[0], -1)
 
     #log probabilities
@@ -87,6 +91,7 @@ def loss_function(images, labels, train_loader, model):
     #calculate the loss
     loss = loss_function(logps, labels) 
     
+    # Return loss calculation and the cross entropy function
     return loss, loss_function
 
 def grad_weights(loss, model):
@@ -99,14 +104,14 @@ def train(model, train_loader, loss_function):
     print("Training neural network...")
 
     # Optimiser using stochastic gradient descent
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+    optimiser = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
 
     # Load images and labels through iterator
     images, labels = next(iter(train_loader))
     images.resize_(64, 784)
 
     # Clear gradients
-    optimizer.zero_grad()
+    optimiser.zero_grad()
 
     # Forward pass
     output = model(images)
@@ -121,7 +126,7 @@ def train(model, train_loader, loss_function):
 
     # Loop for each training epoch
     for e in range(epochs):
-        running_loss = 0
+        loss_total = 0
 
         # Loop for each image and assoicated label in the train_loader
         for images, labels in train_loader:
@@ -129,7 +134,7 @@ def train(model, train_loader, loss_function):
             images = images.view(images.shape[0], -1) 
         
             # Set gradient = 0 for each epoch
-            optimizer.zero_grad()
+            optimiser.zero_grad()
             
             # Model for each image
             output = model(images)
@@ -141,13 +146,13 @@ def train(model, train_loader, loss_function):
             loss.backward()
             
             # Optimizes weights 
-            optimizer.step()
+            optimiser.step()
             
             # calculate the running loss total
-            running_loss += loss.item()
+            loss_total += loss.item()
 
         # Display for each epoch the running loss
-        print("Epoch {} -> Training loss = {}".format(e, (running_loss/len(train_loader))))
+        print("Epoch {} -> Training loss = {}".format(e, (loss_total/len(train_loader))))
 
     # Display total runnning time of training.
     print("\nTraining Time (in minutes) =",(time()-time0)/60)
@@ -155,26 +160,74 @@ def train(model, train_loader, loss_function):
 def validate(test_loader, model):
     print("")
     print("Validating model...")
-    correct_count = 0
-    all_count = 0
 
+    # Initiates counters
+    correct_counter = 0
+    total_counter = 0
+
+    # for each image bacth in the testing_loader
     for images,labels in test_loader:
+        # Loop through the image batch
         for i in range(len(labels)):
+            # load the image at i counter
             img = images[i].view(1, 784)
 
+            # Calculate the log probability using no gradient 
+            # Speed up the process using no gradient
             with torch.no_grad():
+
+                # Call image and pass in image
                 logps = model(img)
 
+            # Convert to natural number by taking exponent of log
             ps = torch.exp(logps)
+            # Creates an array of size 10, for probability of each digit
             probab = list(ps.numpy()[0])
-            pred_label = probab.index(max(probab))
-            true_label = labels.numpy()[i]
-            if(true_label == pred_label):
-                correct_count += 1
-            all_count += 1
 
-    print("Number Of Images Tested =", all_count)
-    print("Model Accuracy =", (correct_count/all_count))
+            # Get the max, which will be the classification
+            pred_label = probab.index(max(probab))
+            # Get ground truth for current image
+            true_label = labels.numpy()[i]
+
+            # Compare ground truth and prediction
+            if(true_label == pred_label):
+                # If = then prediciton was correct
+                # Add 1 to counter
+                correct_counter += 1
+            # Increase total counter
+            total_counter += 1
+
+    # Display the accuracy of as correct_counter / totoal_counter
+    print("Number Of Images Tested =", correct_counter)
+    print("Model Accuracy =", (correct_counter/total_counter))
+
+def classify_image(path, model, ):
+
+    # Open Image using PIL Image
+    img = Image.open(path)
+
+    # Create a transform for the image
+    # Convert it to a tensor
+    t = transforms.Compose([
+        transforms.ToTensor()
+    ])
+
+    # Transform the image
+    img_tr = t(img)
+    # Flatten to 1D by 784 pixels
+    img_tr_new = img_tr.view(1, 784)
+    
+    # Allow use of tensor using no gradient to speed up process
+    with torch.no_grad():
+        # log probability from model of the image
+        logpb = model(img_tr_new)
+    
+    # convert log probability to exponetial to get acutal value
+    pb = torch.exp(logpb)
+    # Will return an array of probabilites for each digit
+    probab = list(pb.numpy()[0])
+
+    return probab
 
 if __name__ == "__main__":
     # Function calls
@@ -200,28 +253,13 @@ if __name__ == "__main__":
     path = ""
 
     while path != "exit":
+        # Get the image at the file path entered
         print("Please enter a filepath:")
         path = input()
-        # Get the image at the file path entered
-    
-        img = Image.open(path)
-
-        t = transforms.Compose([
-            transforms.ToTensor()
-        ])
-
-        img_tr = t(img)
-        img_tr_new = img_tr.view(1, 784)
         
-        with torch.no_grad():
-            # log probability from model of the image
-            logpb = model(img_tr_new)
+        # Call the classifciation function
+        probab = classify_image(path, model)
         
-        # convert log probability to exponetial to get acutal value
-        pb = torch.exp(logpb)
-        # Will return an array of probabilites for each digit
-        probab = list(pb.numpy()[0])
-
         # The classification of the digit is the max probabilty from out model
         print("Classifier =", probab.index(max(probab)))
         
