@@ -20,7 +20,6 @@ class Perceptron:
 
 
 	def activate(self, inputs: [float]) -> float:
-
 		weighted_sum = sum([self.weights[i] * inputs[i] for i in range(self.num_inputs)])
 
 		return 1.0 if weighted_sum + self.bias > 0 else 0.0
