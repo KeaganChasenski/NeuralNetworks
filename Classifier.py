@@ -29,17 +29,17 @@ batch_size_train = 64
 batch_size_test = 1000
 learning_rate = 0.01
 momentum = 0.9 
-epochs = 3
+epochs = 15
 
 
-def load_data():
+def load_data(datapath):
     print("loading data...")
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,)),])
-
-    trainset = datasets.MNIST(r'..\input\MNIST', download=False, train=True, transform=transform)
+    print(datapath)
+    trainset = datasets.MNIST(root = datapath, download=True, train=True, transform=transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size_train, shuffle=True)
 
-    testset = datasets.MNIST(r'..\input\MNIST', download=False, train=False, transform=transform)
+    testset = datasets.MNIST(root = datapath, download=True, train=False, transform=transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size_test, shuffle=True)
 
     # creating a iterator
@@ -56,9 +56,9 @@ def build_Model():
     # Firstly we know that the first input layer with need 784 neurons ( 28 pixels X 28 pixels)
     # nn.Sequetial from PyTorch allows a tensor to passed sequentially through operations
 
-    model=nn.Sequential(nn.Linear(784,128), # 1st layer: 784 input 128 output
+    model=nn.Sequential(nn.Linear(784,256), # 1st layer: 784 input 256 output
             nn.ReLU(),          # ReLu activation for 1st layer
-            nn.Linear(128,64),  # 2nd Layer: 128 Input and 64 output
+            nn.Linear(256,64),  # 2nd Layer: 256 Input and 64 output
             nn.ReLU(),          # ReLu activation for 2nd layer
             nn.Linear(64,10),   # 3rd Layer: 64 Input and 10 outout for (0-9)
             nn.LogSoftmax(dim=1) # log softmax for the probablities of the output layer (3rd)
@@ -66,9 +66,9 @@ def build_Model():
 
     # Display model used
     print("Model built: ")
-    print("\t 1) 1st layer: Linear (in_ features = 784, out_features = 128)")
+    print("\t 1) 1st layer: Linear (in_ features = 784, out_features = 256)")
     print("\t \t Activation function for 1st layer = ReLU()")
-    print("\t 2) 2nd layer: Linear (in_ features = 128, out_features = 64)")
+    print("\t 2) 2nd layer: Linear (in_ features = 256, out_features = 64)")
     print("\t \t Activation function for 2nd layer = ReLU()")
     print("\t 3) 3rd layer: Linear (in_ features = 64, out_features = 10)")
     print("\t \t Activation function for 3rd layer = LogSoftmax() \n")
@@ -198,7 +198,7 @@ def validate(test_loader, model):
             total_counter += 1
 
     # Display the accuracy of as correct_counter / totoal_counter
-    print("Number Of Images Tested =", correct_counter)
+    print("Number Of Images Tested =", total_counter)
     print("Model Accuracy =", (correct_counter/total_counter))
 
 def classify_image(path, model, ):
@@ -230,10 +230,13 @@ def classify_image(path, model, ):
     return probab
 
 if __name__ == "__main__":
+
+    print("Please enter the path to the MNIST data set:")
+    datapath = input()
     # Function calls
 
     # Load and transform the MNIST data set
-    images, labels, train_loader, test_loader = load_data()
+    images, labels, train_loader, test_loader = load_data(datapath)
     # Build the model
     model = build_Model()
     # Create the loss function
@@ -252,10 +255,16 @@ if __name__ == "__main__":
     # Blank path for first condition of while loop
     path = ""
 
-    while path != "exit":
+    while True:
         # Get the image at the file path entered
         print("Please enter a filepath:")
         path = input()
+
+        print("\n")
+
+        # Break when exit entered
+        if path =="exit":
+            break
         
         # Call the classifciation function
         probab = classify_image(path, model)
